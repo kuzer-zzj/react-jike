@@ -1,5 +1,10 @@
-const Home = ()=>{
-    return <div>this is Home</div>
-}
+import BarChart from './components/BarChart'
+
+const Home = () => {
+  
+  return <div>
+    <BarChart></BarChart>
+  </div>;
+};
 
 export default Home;
