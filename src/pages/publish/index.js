@@ -18,19 +18,13 @@ import "react-quill/dist/quill.snow.css";
 import { getChannelAPI } from "@/api/channel";
 import { useEffect, useState } from "react";
 import { creatArticleAPI } from "@/api/article";
+import { useChannleList } from "@/hooks/useChannel";
 
 const { Option } = Select;
 
 const Publish = () => {
-  const [channels, setChannles] = useState([]);
-  useEffect(() => {
-    async function getChannel() {
-      const channelRes = await getChannelAPI();
-      setChannles(channelRes.data.channels);
-    }
-    getChannel();
-  }, []);
-
+    
+    const {channels} =useChannleList()
   const onFinish = (formData) => {
     console.log("表单数据：", formData);
     const { title, content, channelId } = formData;
