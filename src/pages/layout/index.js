@@ -6,7 +6,10 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons'
 import './index.scss'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { useEffect } from 'react'
+import {fetchUserInfo,clearUser} from '@/store/modules/user'
 
 const { Header, Sider } = Layout
 
@@ -34,14 +37,31 @@ const navigate= useNavigate()
     console.log('菜单点击：', route.key)
     navigate(route.key)
   }
+   const location = useLocation()
+   console.log('location:',location)
+
+   //获取用户信息
+   const disptch = useDispatch()
+   useEffect(()=>{
+    disptch(fetchUserInfo())
+   },[disptch])
+
+   const userName = useSelector(state =>state.user.userInfo.name)
+
+   //退出
+   const outConfirm =()=>{
+     console.log('退出确认')
+    disptch(clearUser())
+    navigate('/login')
+   }
   return (
     <Layout>
       <Header className="header">
         <div className="logo" />
         <div className="user-info">
-          <span className="user-name">柴柴老师</span>
+          <span className="user-name">{userName}</span>
           <span className="user-logout">
-            <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消">
+            <Popconfirm title="是否确认退出？" okText="退出" cancelText="取消" onConfirm={outConfirm}>
               <LogoutOutlined /> 退出
             </Popconfirm>
           </span>
@@ -53,7 +73,7 @@ const navigate= useNavigate()
           onClick={menuClick}
             mode="inline"
             theme="dark"
-            defaultSelectedKeys={['1']}
+            selectedKeys={[location.pathname]}
             items={items}
             style={{ height: '100%', borderRight: 0 }}></Menu>
         </Sider>
