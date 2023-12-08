@@ -3,9 +3,12 @@ import Login from "@/pages/login";
 import AuthRoute from "@/components/AuthRoute";
 
 import { createBrowserRouter } from "react-router-dom";
-import Home from "@/pages/home";
-import Article from "@/pages/article";
-import Publish from "@/pages/publish";
+import { lazy,Suspense } from "react";
+
+const Home =lazy(()=>import( "@/pages/home")) ;
+const Article = lazy(()=>import( "@/pages/article")) ;
+const Publish = lazy(()=>import( "@/pages/publish")) ;
+
 
 const router = createBrowserRouter([
   {
@@ -19,15 +22,15 @@ const router = createBrowserRouter([
       {
         // path: "/home",
         index: true,
-        element: <Home></Home>,
+        element: <Suspense fallback={'加载中'}><Home></Home></Suspense> ,
       },
       {
         path: "/article",
-        element: <Article></Article>,
+        element:<Suspense fallback={'加载中'}> <Article></Article></Suspense>,
       },
       {
         path: "/publish",
-        element: <Publish></Publish>,
+        element:<Suspense fallback={'加载中'}> <Publish></Publish></Suspense>,
       },
     ],
   },
