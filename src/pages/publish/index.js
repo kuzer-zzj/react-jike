@@ -11,38 +11,51 @@ import {
   message,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import "./index.scss";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { getChannelAPI } from "@/api/channel";
 import { useEffect, useState } from "react";
-import { creatArticleAPI } from "@/api/article";
+import { creatArticleAPI, getArticleAPI, updateArticleAPI } from "@/api/article";
 import { useChannleList } from "@/hooks/useChannel";
 
 const { Option } = Select;
 
 const Publish = () => {
-    
-    const {channels} =useChannleList()
+  const { channels } = useChannleList();
   const onFinish = (formData) => {
     console.log("表单数据：", formData);
-    const { title, content, channelId } = formData;
-    
-    if (upImgList.length !== imgTyep) return message.warning('图片类型和数量不符！')
+    const { title, content, channel_id } = formData;
+
+    if (upImgList.length !== imgTyep)
+      return message.warning("图片类型和数量不符！");
 
     const reqData = {
       title,
       content,
-      channelId,
+      channel_id,
       type: 1,
       cover: {
         type: imgTyep,
-        images: upImgList.map(item=>item.response.data.url),
+        images: upImgList.map((item) => {
+          if (item.response) {
+            return item.response.data.url;
+          } else {
+            return item.url;
+          }
+        }),
       },
     };
-    creatArticleAPI(reqData);
-    message.success("发布成功");
+    if(id){
+      reqData.id = id;
+      updateArticleAPI(reqData)
+      message.success("更新成功");
+    }else{
+      creatArticleAPI(reqData);
+      message.success("发布成功");
+    }
+    
   };
 
   const [upImgList, setUpImgList] = useState([]);
@@ -58,6 +71,32 @@ const Publish = () => {
     setImgType(e.target.value);
   };
 
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
+  console.log("id=", id);
+
+  const [form] = Form.useForm();
+  useEffect(() => {
+    console.log("form: ", form);
+    async function getArticle() {
+      const res = await getArticleAPI(id);
+      const resultData = res.data;
+      form.setFieldsValue({
+        ...resultData,
+        type: resultData.cover.type,
+      });
+      setImgType(resultData.cover.type);
+      setUpImgList(
+        resultData.cover.images.map((i) => {
+          return { url: i };
+        })
+      );
+    }
+    if (id) {
+      getArticle();
+    }
+  }, [id, form]);
+
   return (
     <div className="publish">
       <Card
@@ -65,7 +104,7 @@ const Publish = () => {
           <Breadcrumb
             items={[
               { title: <Link to={"/"}>首页</Link> },
-              { title: "发布文章" },
+              { title: `${id ? "更新文章" : "发布文章"}` },
             ]}
           />
         }
@@ -75,6 +114,7 @@ const Publish = () => {
           wrapperCol={{ span: 16 }}
           initialValues={{ type: 1 }}
           onFinish={onFinish}
+          form={form}
         >
           <Form.Item
             label="标题"
@@ -106,7 +146,7 @@ const Publish = () => {
                 <Radio value={0}>无图</Radio>
               </Radio.Group>
             </Form.Item>
-            {imgTyep >0 && (
+            {imgTyep > 0 && (
               <Upload
                 listType="picture-card"
                 showUploadList
@@ -114,6 +154,7 @@ const Publish = () => {
                 name="image"
                 onChange={onUploudChange}
                 maxCount={imgTyep}
+                fileList={upImgList}
               >
                 {" "}
                 <div style={{ marginTop: 8 }}>

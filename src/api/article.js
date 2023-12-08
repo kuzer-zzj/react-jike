@@ -10,6 +10,16 @@ export const creatArticleAPI = (data) =>{
     )
 }
 
+export const updateArticleAPI = (data) =>{
+    return request(
+        {
+            url: `/mp/articles/${data.id}?draft=false`,
+            method: 'put',
+            data
+        }
+    )
+}
+
 export const getArtListAPI = (params) =>{
     return request(
         {
@@ -27,3 +37,7 @@ export const delArticleAPI = (id) =>
         
     })
 
+export const getArticleAPI = (id) =>
+request({
+    url: `/mp/articles/${id}`,
+})
